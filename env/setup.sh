@@ -1,4 +1,4 @@
-!/bin/bash
+#!/bin/bash
 set -e
 set -o pipefail
 set u
@@ -34,6 +34,13 @@ build_images(){
   done
 }
 
+replace_key_stubs(){
+    KEY=$(cat ./keys/id_rsa.pub)
+    for idx in {0..2}; do
+        sed -i "s%- ssh-rsa .*%- ${KEY}%g" "./demo-vm${idx}.seed"
+    done
+}
+
 
 start_vms(){
 for idx in {0..2}; do
@@ -62,6 +69,13 @@ done
 echo "i am running at: $(pwd)"
 echo "my directory is at: ${DIR}"
 echo "content is at: ${CONTENT_ROOT}"
+
+# Generate ssh key
+ssh-keygen -q -f ./keys/id_rsa -N ""
+chmod +r ./keys/id_rsa
+
+# Replace key stub in seed files
+replace_key_stubs
 
 mkdir -p "${OUTPUT_DIR}"
 

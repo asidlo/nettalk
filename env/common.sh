@@ -6,6 +6,7 @@ set u
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 CONTENT_ROOT="$(dirname "${DIR}")"
 OUTPUT_DIR="${CONTENT_ROOT}/output"
+SSHKEY="${CONTENT_ROOT}/env/keys/id_rsa"
 
 image_name="${OUTPUT_DIR}/bionic-server-cloudimg-amd64.img"
 
@@ -42,7 +43,7 @@ exec_on_vm(){
 	echo "** [VM]:${vm}"
 	echo "** [++]:${cmd}"
 
-	ssh  -o LogLevel=ERROR -o "UserKnownHostsFile=/dev/null" -o "StrictHostKeyChecking=no" ${vm_ips[$idx]} "${cmd}" 
+	ssh -i "$SSHKEY" -o LogLevel=ERROR -o "UserKnownHostsFile=/dev/null" -o "StrictHostKeyChecking=no" user@${vm_ips[$idx]} "${cmd}" 
 }
 
 copy_to_vm(){
@@ -55,7 +56,7 @@ copy_to_vm(){
 	idx="$(vm_to_idx "${vm}")"
 
 	echo "** copying $src $vm:$dst"
-	scp -o LogLevel=ERROR -o "UserKnownHostsFile=/dev/null" -o "StrictHostKeyChecking=no" ${src} ${vm_ips[$idx]}:${dst}
+	scp -i "$SSHKEY" -o LogLevel=ERROR -o "UserKnownHostsFile=/dev/null" -o "StrictHostKeyChecking=no" ${src} user@${vm_ips[$idx]}:${dst}
 }
 
 copy_from_vm(){
@@ -68,5 +69,5 @@ copy_from_vm(){
 	idx="$(vm_to_idx "${vm}")"
 
 	echo "** copying $src $vm:$dst"
-	scp -o "StrictHostKeyChecking=no" ${vm_ips[$idx]}:${src} ${dst}
+	scp -i "$SSHKEY" -o "StrictHostKeyChecking=no" user@${vm_ips[$idx]}:${src} ${dst}
 }
